@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -15,7 +16,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-@PropertySource(value = "classpath:/datasource-${spring.profiles.active}.properties")
+//@EnableTransactionManagement
+@Configuration
+@PropertySource(value = "classpath:datasource-${spring.profiles.active}.properties")
 public class DataSourceConfig {
 
     private static final String FALSE = "false";
@@ -47,7 +50,7 @@ public class DataSourceConfig {
     @Bean
     public RoutingDataSource routingDataSource() {
         RoutingDataSource routingDataSource = new RoutingDataSource();
-        routingDataSource.setDefaultTargetDataSource("MASTER");
+        routingDataSource.setDefaultTargetDataSource(DataSourceType.MASTER);
 
         Map<Object, Object> dataSourceMap = new HashMap<>();
         dataSourceMap.put(DataSourceType.MASTER, masterDataSource());
@@ -59,10 +62,12 @@ public class DataSourceConfig {
     }
 
 
-    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean() {
+    @Bean(name = "entityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(routingDataSource());
         em.setPersistenceUnitName("persistence.routing");
+        em.setPackagesToScan("com.ums");
         em.setJpaPropertyMap(getHibernatePropertiesMap());
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
@@ -82,8 +87,8 @@ public class DataSourceConfig {
         properties.put("hibernate.generate_statistics", FALSE);
         properties.put("hibernate.hbm2ddl.auto", "none");
         properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL5InnoDBDialect");
-        properties.put("hibernate.physical_naming_strategy",
-                "com.paytm.invoicing.dao.config.CustomPhysicalNamingStrategy");
+//        properties.put("hibernate.physical_naming_strategy",
+//                "com.paytm.invoicing.dao.config.CustomPhysicalNamingStrategy");
         return properties;
     }
 
@@ -102,8 +107,8 @@ public class DataSourceConfig {
         properties.put("bytecode.use_reflection_optimizer", FALSE);
         properties.put("javax.persistence.validation.mode", "none");
         properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL5InnoDBDialect");
-        properties.put("hibernate.physical_naming_strategy",
-                "com.paytm.invoicing.dao.config.CustomPhysicalNamingStrategy");
+//        properties.put("hibernate.physical_naming_strategy",
+//                "com.paytm.invoicing.dao.config.CustomPhysicalNamingStrategy");
         return properties;
     }
 

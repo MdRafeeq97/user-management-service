@@ -18,7 +18,7 @@ public class RouteQueryAdvisor implements Ordered {
         return 99;
     }
 
-    @Around("@annotation(config.ReadOnly)")
+    @Around("@annotation(com.ums.config.ReadOnly)")
     public Object aroundReadOnly(ProceedingJoinPoint pjp) throws Throwable {
         try {
             log.info(" Current Transaction Type ReadOnly ? " + TransactionSynchronizationManager.isCurrentTransactionReadOnly());
